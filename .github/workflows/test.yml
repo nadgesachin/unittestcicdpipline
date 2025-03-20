@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: your-environment-name
 
     strategy:
       matrix:
@@ -62,6 +63,7 @@ jobs:
           
           See details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         to: ${{ secrets.EMAIL_TO }}
+        cc: ${{ secrets.EMAIL_CC != '' && secrets.EMAIL_CC || '' }}
         from: GitHub Actions
 
     # Commented out Slack notification
