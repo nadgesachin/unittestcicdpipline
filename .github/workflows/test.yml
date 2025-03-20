@@ -27,10 +27,12 @@ jobs:
       run: npm install
       
     - name: Run tests
+      id: run-tests
       if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
       run: npm test
       
     - name: Run tests with coverage
+      id: run-tests-coverage
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       run: npm run test:coverage
       
@@ -39,4 +41,36 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: code-coverage-report
-        path: coverage/ 
+        path: coverage/
+        
+    - name: Send email notification on failure
+      uses: dawidd6/action-send-mail@v3
+      if: failure()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: '❌ Jest Tests Failed: ${{ github.repository }}'
+        body: |
+          Tests have failed in repository ${{ github.repository }}
+          
+          Workflow: ${{ github.workflow }}
+          Run: ${{ github.run_id }}
+          Committer: ${{ github.actor }}
+          Commit: ${{ github.sha }}
+          
+          See details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        to: ${{ secrets.EMAIL_TO }}
+        from: GitHub Actions
+
+    # Commented out Slack notification
+    # - name: Send Slack notification on failure
+    #   uses: 8398a7/action-slack@v3
+    #   if: failure()
+    #   with:
+    #     status: ${{ job.status }}
+    #     fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+    #     text: 'Test failures in ${{ github.repository }}'
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
