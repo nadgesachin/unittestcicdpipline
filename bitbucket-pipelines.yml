@@ -1,0 +1,26 @@
+image: node:16
+
+pipelines:
+  default:
+    - step:
+        name: Build and Test
+        caches:
+          - node
+        script:
+          - npm install
+          - npm test
+        artifacts:
+          - coverage/**
+  
+  branches:
+    main:
+      - step:
+          name: Build and Test
+          caches:
+            - node
+          script:
+            - npm install
+            - npm run test:coverage
+          artifacts:
+            - coverage/**
+      # You could add additional steps here for deployment, etc. 
